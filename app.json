@@ -1,0 +1,70 @@
+{
+  "expo": {
+    "name": "naowa",
+    "slug": "naowa",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "NAOWA",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/naowa.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#6A7814"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "splash": {
+        "image": "./assets/images/naowa.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#6A7814"
+      },
+      "bundleIdentifier": "com.codieprodigy.naowa"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/naowa.png",
+        "backgroundColor": "#ffffff"
+      },
+      "versionCode": 1,
+      "edgeToEdgeEnabled": true,
+      "splash": {
+        "image": "./assets/images/naowa.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#fff"
+      },
+      "package": "com.codieprodigy.naowa"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/naowa.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#fff",
+          "image": "./assets/images/naowa.png",
+          "dark": {
+            "image": "./assets/images/naowa.png",
+            "backgroundColor": "#982323"
+          },
+          "imageWidth": 200
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e8f5c13f-ad2a-4451-888c-24d7f6e2dd33"
+      }
+    }
+  }
+}
