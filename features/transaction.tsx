@@ -141,7 +141,7 @@ export const TransactionsModule = () => {
         </View>
       ) : (
         <View style={styles.transactionsList}>
-          {transactions.map((transaction) => (
+          {transactions.slice(0,4).map((transaction) => (
             <TransactionItem key={transaction.id} transaction={transaction} />
           ))}
         </View>
@@ -269,3 +269,5 @@ const styles = StyleSheet.create({
 });
 
 export default TransactionsModule;
+
+

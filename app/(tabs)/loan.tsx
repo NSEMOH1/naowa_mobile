@@ -15,6 +15,8 @@ import { CircularProgressProps, LoanRecord } from "@/types";
 import { useAuthStore } from "@/hooks/useAuth";
 import { router } from "expo-router";
 import { useBalances } from "@/hooks/useBalances";
+import { getInitials } from "@/constants/data";
+import { useSavingsBalance } from "@/hooks/useSavings";
 
 interface LoanCategory {
   title: string;
@@ -29,8 +31,9 @@ interface LoanCategory {
 
 export default function Loan() {
   const [showLoanModal, setShowLoanModal] = useState(false);
-  // const balance = useBalances();
-  // const { user } = useAuthStore();
+  const balance = useBalances();
+  const { balance: savingsBalance} = useSavingsBalance();
+  const { user } = useAuthStore();
   const handlePayment = () => {
     router.push("/payments");
   };
@@ -190,7 +193,9 @@ export default function Loan() {
         </View>
         <View style={styles.headerRight}>
           <View style={styles.avatarContainer}>
-            <Text style={styles.avatarText}>JA</Text>
+            <Text style={styles.avatarText}>
+              {getInitials(user?.full_name || "")}
+            </Text>
           </View>
           <Ionicons
             name="notifications"
@@ -207,16 +212,13 @@ export default function Loan() {
       >
         <View style={styles.greetingContainer}>
           <Text style={styles.greeting}>
-            Good afternoon <Text style={styles.name}>John Doe</Text>{" "}
-            👋
+            Good afternoon <Text style={styles.name}>{user?.full_name}</Text> 👋
           </Text>
         </View>
 
         <View style={styles.balanceCard}>
           <Text style={styles.balanceLabel}>Loan Balance</Text>
-          <Text style={styles.balanceAmount}>
-            ₦500000
-          </Text>
+          <Text style={styles.balanceAmount}>₦{balance?.loan_balance}</Text>
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
               <Ionicons name="card" size={16} color="#fff" />
@@ -225,11 +227,16 @@ export default function Loan() {
             <TouchableOpacity
               style={styles.payOffButton}
               onPress={handlePayment}
-            > 
+            >
               <Ionicons name="download" size={16} color="#fff" />
               <Text style={styles.payOffButtonText}>Pay Off</Text>
             </TouchableOpacity>
           </View>
+        </View>
+
+        <View style={styles.twobalanceCard}>
+          <Text style={styles.balanceLabel}>MONTHLY DEDUCTION</Text>
+          <Text style={styles.balanceAmount}>₦{savingsBalance?.monthlyDeduction}</Text>
         </View>
 
         <View style={styles.section}>
@@ -314,6 +321,25 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     borderRadius: 40,
     backgroundColor: "black",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 4,
+    shadowRadius: 15,
+    elevation: 8,
+    borderWidth: 8,
+    borderColor: "rgba(255, 255, 255, 0.5)",
+  },
+  twobalanceCard: {
+    marginRight: 10,
+    padding: 25,
+    marginLeft: 10,
+    borderRadius: 40,
+    marginTop: 10,
+    marginBottom: 10,
+    backgroundColor: "purple",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,

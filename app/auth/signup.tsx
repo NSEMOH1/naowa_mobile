@@ -18,6 +18,7 @@ import Stage3BankInfoSimple from "@/features/signup-stages/stage3";
 import Stage4NextOfKin from "@/features/signup-stages/stage4";
 import Stage5Documents from "@/features/signup-stages/stage5";
 import Stage6Security from "@/features/signup-stages/stage6";
+import { ArrowRight } from "lucide-react-native";
 
 interface Document {
   uri: string;
@@ -305,26 +306,25 @@ const RegistrationForm = () => {
 
   const handleRegister = useCallback(async () => {
     try {
-      dispatch({ type: "SHOW_SUCCESS" });
-      // dispatch({ type: "SET_LOADING", isLoading: true });
-      // if (!validateCurrentStep()) {
-      //   return;
-      // }
+      dispatch({ type: "SET_LOADING", isLoading: true });
+      if (!validateCurrentStep()) {
+        return;
+      }
 
-      // const formData = createFormData();
-      // console.log("Submitting formData:", formData);
-      // const response = await api.post("/api/auth/member/register", formData, {
-      //   headers: {
-      //     "Content-Type": "multipart/form-data",
-      //   },
-      //   timeout: 30000,
-      // });
+      const formData = createFormData();
+      console.log("Submitting formData:", formData);
+      const response = await api.post("/api/auth/member/register", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        timeout: 30000,
+      });
 
-      // if (response.status === 200 || response.status === 201) {
-      //   dispatch({ type: "SHOW_SUCCESS" });
-      // } else {
-      //   throw new Error(response.data?.message || "Registration failed");
-      // }
+      if (response.status === 200 || response.status === 201) {
+        dispatch({ type: "SHOW_SUCCESS" });
+      } else {
+        throw new Error(response.data?.message || "Registration failed");
+      }
     } catch (error: any) {
       console.error("Registration error:", error);
       let errorMessage = "Registration failed. Please try again.";
@@ -745,7 +745,7 @@ const RegistrationForm = () => {
                   onPress={handleLogin}
                 >
                   <Text style={styles.loginButtonText}>Login</Text>
-                  <Text style={styles.loginArrow}>→</Text>
+                  <ArrowRight color={"white"} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -815,7 +815,6 @@ const RegistrationForm = () => {
                 : state.step === 6
                 ? "Submit"
                 : "Proceed"}
-              {!state.isLoading && " →"}
             </Text>
           </TouchableOpacity>
         </View>

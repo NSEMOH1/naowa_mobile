@@ -37,8 +37,8 @@ export default function LoginScreen() {
   const handleSignin = async () => {
     setLoading(true);
     try {
-      // const res = await api.post("/api/auth/member/login", payload);
-      // setUser(res.data.user);
+      const res = await api.post("/api/auth/member/login", payload);
+      setUser(res.data.user);
       router.push("/(tabs)");
     } catch (e) {
       console.error(e);

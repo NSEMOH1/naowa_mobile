@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    zIndex: 3, // Ensure button stays on top
+    zIndex: 3,
   },
   nextIcon: {
     fontSize: 24,
@@ -158,7 +158,6 @@ const styles = StyleSheet.create({
     textAlignVertical: "center",
     lineHeight: 24,
   },
-  // New styles for bottom image
   bottomImageContainer: {
     position: 'absolute',
     bottom: 0,
@@ -168,6 +167,6 @@ const styles = StyleSheet.create({
   },
   bottomImage: {
     width: width,
-    height: 140, // Adjust height as needed
+    height: 140,
   },
 });

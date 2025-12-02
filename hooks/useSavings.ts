@@ -2,18 +2,18 @@ import { useEffect } from "react";
 import { useSavingsBalanceStore } from "@/store/savings";
 
 export const useSavingsBalance = (autoFetch = true) => {
-  const { balance, loading, error, fetchSavingsBalance } =
-    useSavingsBalanceStore();
+ const { balance, loading, error, fetchSavingsBalance } = 
+  useSavingsBalanceStore();
 
-  useEffect(() => {
-    if (autoFetch && !balance && !loading) {
-      const timer = setTimeout(() => {
-        fetchSavingsBalance();
-      }, 100);
+useEffect(() => {
+  if (autoFetch && !loading) {
+    const timer = setTimeout(() => {
+      fetchSavingsBalance();
+    }, 100);
 
-      return () => clearTimeout(timer);
-    }
-  }, [autoFetch, balance, loading, fetchSavingsBalance]);
+    return () => clearTimeout(timer);
+  }
+}, [autoFetch, loading, fetchSavingsBalance]);
 
   return {
     balance,

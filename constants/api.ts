@@ -2,8 +2,8 @@ import axios from "axios";
 
 export const config = {
   apiUrl: process.env.EXPO_PUBLIC_API_URL || "",
-  paystackKey: "pk_test_85df7be5df5514e6966c2fce715825daf8e07612",
-  paystackSecretKey: "sk_test_24b6190e77c8a4370778aa82c6164a93467a346b",
+  paystackKey: process.env.EXPO_PUBLIC_PAYSTACK_TEST_KEY || "",
+  paystackSecretKey: process.env.EXPO_PUBLIC_PAYSTACK_SECRET_KEY || "",
 };
 
 const api = axios.create({

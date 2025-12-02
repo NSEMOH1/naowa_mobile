@@ -23,11 +23,11 @@ export default function RootLayout() {
     Poppins_400Regular,
     Poppins_700Bold,
   });
-  // const { getAccessToken, setAccessToken } = useTokenStorage();
+  const { getAccessToken, setAccessToken } = useTokenStorage();
 
-  // useEffect(() => {
-  //   setupInterceptors({ getAccessToken, setAccessToken });
-  // }, [getAccessToken, setAccessToken]);
+  useEffect(() => {
+    setupInterceptors({ getAccessToken, setAccessToken });
+  }, [getAccessToken, setAccessToken]);
 
   if (!loaded) {
     // Async font loading only occurs in development.

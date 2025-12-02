@@ -26,7 +26,7 @@ export default function EditProfile() {
 
   const handleSubmit = async () => {
     try {
-      const res = await api.put(`/api/member/${user?.id}`, payload);
+      await api.put(`/api/member/${user?.id}`, payload);
       router.push("/(tabs)");
     } catch (e) {
       console.error(e);

@@ -34,6 +34,12 @@ export interface MemberData {
     id: string;
     email: string;
     full_name: string;
+    username: string;
+    occupation: string;
+    place_of_work: string;
+    next_of_kin: {
+      name: string;
+    };
     created_at: string;
     date_of_birth: string;
     bank: {

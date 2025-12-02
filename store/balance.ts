@@ -17,6 +17,7 @@ export const useBalanceStore = create<BalanceState>((set) => ({
   fetchBalance: async () => {
     try {
       const response = await api.get("/api/balances");
+      console.log("balance", response.data)
       set({ balance: response.data });
     } catch (error) {
       console.error("Error fetching balance:", error);

@@ -26,12 +26,12 @@ const WithdrawalApplication = () => {
   const [pin, setPin] = useState("");
   const [isLoading, setLoading] = useState(false);
   const { user } = useAuthStore();
-  const { member, loading, fetchMemberData } = useMemberStore();
+  const { member, loading, fetchMember} = useMemberStore();
   useEffect(() => {
     if (user?.id) {
-      fetchMemberData(user.id);
+      fetchMember(user.id);
     }
-  }, [user?.id, fetchMemberData]);
+  }, [user?.id, fetchMember]);
 
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
@@ -46,7 +46,7 @@ const WithdrawalApplication = () => {
   const handleWithdrawal = async () => {
     setLoading(true);
     try {
-      await api.post("/api/savings/withdraw", payload);
+      await api.post("/api/withdrawal", payload);
       Alert.alert("Success", "Withdrawal application submitted successfully", [
         {
           text: "OK",
@@ -57,6 +57,7 @@ const WithdrawalApplication = () => {
       ]);
     } catch (e) {
       console.error(e);
+       Alert.alert("Failed", "Withdrawal application failed");
     } finally {
       setLoading(false);
     }
@@ -84,7 +85,7 @@ const WithdrawalApplication = () => {
           <Text style={styles.label}>Full Name</Text>
           <TextInput
             style={[styles.input, styles.disabledInput]}
-            value={member?.user.full_name}
+            value={member?.full_name}
             editable={false}
           />
         </View>
@@ -93,7 +94,7 @@ const WithdrawalApplication = () => {
           <Text style={styles.label}>Address</Text>
           <TextInput
             style={[styles.input, styles.disabledInput]}
-            value={member?.user.address}
+            value={member?.address}
             editable={false}
           />
         </View>
@@ -102,7 +103,7 @@ const WithdrawalApplication = () => {
           <Text style={styles.label}>Email</Text>
           <TextInput
             style={[styles.input, styles.disabledInput]}
-            value={member?.user.email}
+            value={member?.email}
             editable={false}
           />
         </View>
@@ -112,7 +113,7 @@ const WithdrawalApplication = () => {
           <TextInput
             style={[styles.input, styles.disabledInput]}
             placeholder="10/02/1993"
-            value={member?.user.date_of_birth}
+            value={member?.date_of_birth}
             editable={false}
           />
         </View>
@@ -123,7 +124,7 @@ const WithdrawalApplication = () => {
             style={[styles.input, styles.disabledInput]}
             keyboardType="phone-pad"
             editable={false}
-            value={member?.user.phone}
+            value={member?.phone}
           />
         </View>
 
@@ -156,7 +157,7 @@ const WithdrawalApplication = () => {
           <Text style={styles.label}>Salary Account Name</Text>
           <TextInput
             style={[styles.input, styles.disabledInput]}
-            value={member?.user.bank[0].account_name}
+            value={member?.bank[0].account_name}
           />
         </View>
 
@@ -165,7 +166,7 @@ const WithdrawalApplication = () => {
           <TextInput
             style={[styles.input, styles.disabledInput]}
             keyboardType="numeric"
-            value={member?.user.bank[0].account_number}
+            value={member?.bank[0].account_number}
           />
         </View>
 
@@ -173,7 +174,7 @@ const WithdrawalApplication = () => {
           <Text style={styles.label}>Bank Name</Text>
           <TextInput
             style={[styles.input, styles.disabledInput]}
-            value={member?.user.bank[0].bank_name}
+            value={member?.bank[0].bank_name}
           />
         </View>
 

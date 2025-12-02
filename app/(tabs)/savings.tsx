@@ -16,10 +16,11 @@ import { useSavingsBalance } from "@/hooks/useSavings";
 import api from "@/constants/api";
 import { useAuthStore } from "@/hooks/useAuth";
 import { useBalances } from "@/hooks/useBalances";
+import { getInitials } from "@/constants/data";
 
 export default function Savings() {
-  // const { balance: savingsBalance, refetch } = useSavingsBalance();
-  // const balance = useBalances();
+  const { balance: savingsBalance, refetch } = useSavingsBalance();
+  const balance = useBalances();
   const [newSavings, setNewSavings] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -39,9 +40,9 @@ export default function Savings() {
   const handleMonthlyDeduction = async () => {
     setLoading(true);
     try {
-      // await api.put("/api/savings/deduction", payload);
+      await api.put("/api/savings/deduction", payload);
       setSuccess(true);
-      // await refetch()
+      await refetch();
       setNewSavings("");
     } catch (e: any) {
       setErrorMessage(e.message);
@@ -49,25 +50,6 @@ export default function Savings() {
       setLoading(false);
     }
   };
-
-  const financialRecords = [
-    {
-      id: 1,
-      title: "Monthly Deduction",
-      amount: `₦50000`,
-      status: "active",
-      color: "white",
-      bgColor: "#ADB7F0",
-    },
-    // {
-    //   id: 2,
-    //   title: "Quick Savings",
-    //   amount: "₦7,265",
-    //   status: "Coming Soon",
-    //   color: "white",
-    //   bgColor: "#EBB9A1",
-    // },
-  ];
 
   if (success) {
     return (
@@ -241,7 +223,9 @@ export default function Savings() {
           </View>
           <View style={styles.headerRight}>
             <View style={styles.avatarContainer}>
-              <Text style={styles.avatarText}>JA</Text>
+              <Text style={styles.avatarText}>
+                {getInitials(user?.full_name || "")}
+              </Text>
             </View>
             <Ionicons
               name="notifications"
@@ -260,8 +244,10 @@ export default function Savings() {
         </View>
 
         <View style={styles.balanceCard}>
-          <Text style={styles.balanceLabel}>Savings Balance</Text>
-          <Text style={styles.balanceAmount}>₦500000</Text>
+          <Text style={styles.balanceLabel}>TOTAL BALANCE</Text>
+          <Text style={styles.balanceAmount}>
+            ₦{savingsBalance?.totalSavings}
+          </Text>
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.payButton} onPress={handleDeposit}>
               <Ionicons name="card" size={16} color="#fff" />
@@ -272,11 +258,41 @@ export default function Savings() {
               onPress={handleWithdrawal}
             >
               <Ionicons name="download" size={16} color="#fff" />
-              <Text style={styles.payOffButtonText}>Withdrawal</Text>
+              <Text style={styles.payOffButtonText}>Withdraw</Text>
             </TouchableOpacity>
           </View>
         </View>
 
+        <View style={styles.twobalanceCard}>
+          <Text style={styles.balanceLabel}>MONTHLY DEDUCTION</Text>
+          <Text style={styles.balanceAmount}>
+            ₦{savingsBalance?.monthlyDeduction}
+          </Text>
+        </View>
+
+        <View style={styles.fourbalanceCard}>
+          <Text style={styles.balanceLabel}>CORPERATE SAVINGS</Text>
+          <Text style={styles.balanceAmount}>
+            ₦{savingsBalance?.cooperativeSavings.toString()}
+          </Text>
+        </View>
+
+        <View style={styles.threebalanceCard}>
+          <Text style={styles.balanceLabel}>PERSONAL SAVINGS</Text>
+          <Text style={styles.balanceAmount}>
+            ₦{savingsBalance?.normalSavings.toString()}
+          </Text>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.payOffButton}
+              onPress={handleWithdrawal}
+            >
+              <Ionicons name="download" size={16} color="#fff" />
+              <Text style={styles.payOffButtonText}>Withdraw</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        {/* 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Savings Record</Text>
           <View style={styles.financialGrid}>
@@ -316,7 +332,7 @@ export default function Savings() {
               </TouchableOpacity>
             ))}
           </View>
-        </View>
+        </View> */}
 
         <View style={styles.adjustcontainer}>
           <Text style={styles.title}>Savings Adjustment</Text>
@@ -324,7 +340,7 @@ export default function Savings() {
           <Text style={styles.label}>Current Monthly Savings Deductions</Text>
           <TextInput
             style={styles.input}
-            value={`₦50000`}
+            value={`₦${savingsBalance?.monthlyDeduction}`}
             keyboardType="numeric"
             editable={false}
             placeholder={"500000"}
@@ -656,6 +672,63 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     borderRadius: 40,
     backgroundColor: "#982323",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 4,
+    shadowRadius: 15,
+    elevation: 8,
+    borderWidth: 8,
+    borderColor: "rgba(255, 255, 255, 0.5)",
+  },
+  twobalanceCard: {
+    marginRight: 10,
+    padding: 25,
+    marginLeft: 10,
+    borderRadius: 40,
+    marginTop: 10,
+    marginBottom: 10,
+    backgroundColor: "black",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 4,
+    shadowRadius: 15,
+    elevation: 8,
+    borderWidth: 8,
+    borderColor: "rgba(255, 255, 255, 0.5)",
+  },
+  threebalanceCard: {
+    marginRight: 10,
+    padding: 25,
+    marginLeft: 10,
+    borderRadius: 40,
+    marginTop: 10,
+    marginBottom: 10,
+    backgroundColor: "blue",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 4,
+    shadowRadius: 15,
+    elevation: 8,
+    borderWidth: 8,
+    borderColor: "rgba(255, 255, 255, 0.5)",
+  },
+  fourbalanceCard: {
+    marginRight: 10,
+    padding: 25,
+    marginLeft: 10,
+    borderRadius: 40,
+    marginTop: 10,
+    marginBottom: 10,
+    backgroundColor: "green",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,

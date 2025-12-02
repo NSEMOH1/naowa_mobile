@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -78,13 +77,13 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
   const { balance: savingsBalance } = useSavingsBalance();
   const balance = useBalances();
   const { user } = useAuthStore();
-  const { member, fetchMemberData } = useMemberStore();
+  const { member, fetchMember} = useMemberStore();
 
   useEffect(() => {
     if (user?.id) {
-      fetchMemberData(user?.id);
+      fetchMember(user?.id);
     }
-  }, [user?.id, fetchMemberData]);
+  }, [user?.id, fetchMember]);
 
   const getInterestRate = (selectedTenure: string): number => {
     switch (selectedTenure) {
@@ -219,23 +218,35 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
   };
 
   const validateStep1 = (): boolean => {
-    return !!servicingLoan;
+    return !!(servicingLoan && amount && !isNaN(loanAmount) && loanAmount > 0);
   };
 
   const validateStep2 = (): boolean => {
-    return !!(uploadedFiles.nonIndebtedness && uploadedFiles.application && uploadedFiles.validId);
+    return true;
   };
 
   const validateStep3 = (): boolean => {
-    return !!(uploadedFiles.incomeProof && uploadedFiles.accountStatement && uploadedFiles.utilityBill);
+    return !!(
+      uploadedFiles.nonIndebtedness &&
+      uploadedFiles.application &&
+      uploadedFiles.validId
+    );
   };
 
   const validateStep4 = (): boolean => {
-    return !!(uploadedFiles.guarantorLetter && uploadedFiles.guarantorPassport && uploadedFiles.personalPassport);
+    return !!(
+      uploadedFiles.incomeProof &&
+      uploadedFiles.accountStatement &&
+      uploadedFiles.utilityBill
+    );
   };
 
   const validateStep5 = (): boolean => {
-    return !!(amount && !isNaN(loanAmount) && loanAmount > 0);
+    return !!(
+      uploadedFiles.guarantorLetter &&
+      uploadedFiles.guarantorPassport &&
+      uploadedFiles.personalPassport
+    );
   };
 
   const handleProceed = () => {
@@ -245,11 +256,10 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
     switch (step) {
       case 1:
         canProceed = validateStep1();
-        errorMessage = "Please fill in all required fields";
+        errorMessage = "Please fill in all required fields and enter a valid loan amount";
         break;
       case 2:
         canProceed = validateStep2();
-        errorMessage = "Please upload all required documents";
         break;
       case 3:
         canProceed = validateStep3();
@@ -261,7 +271,7 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
         break;
       case 5:
         canProceed = validateStep5();
-        errorMessage = "Please enter valid loan amount";
+        errorMessage = "Please upload all required documents";
         break;
       case 6:
         submitLoanApplication();
@@ -270,7 +280,7 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
         canProceed = true;
     }
 
-    if (!canProceed) {
+    if (!canProceed && step !== 2) {
       Alert.alert("Error", errorMessage);
       return;
     }
@@ -387,7 +397,6 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
         setLoanId(response.data.loan.id);
         console.log("otp", response.data.otp);
         Alert.alert("Success", response.data.message);
-
       }
       setStep(7);
     } catch (error) {
@@ -517,10 +526,18 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
             )}
           </View>
 
-          {/* Step 1: Form Questions */}
           {step === 1 && (
             <ScrollView contentContainerStyle={styles.scrollContent}>
               <Text style={styles.sectionTitle}>Loan Application Form</Text>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Loan Type</Text>
+                <TextInput
+                  style={[styles.input, styles.disabledInput]}
+                  value={"REGULAR LOAN"}
+                  editable={false}
+                />
+              </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>
@@ -563,7 +580,18 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Total Savings (₦)</Text>
+                <Text style={styles.label}>Loan Amount (₦) *</Text>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  placeholder="Enter loan amount"
+                  value={amount}
+                  onChangeText={setAmount}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Savings Balance (₦)</Text>
                 <TextInput
                   style={[styles.input, styles.disabledInput]}
                   value={`₦${balance?.savings_balance || 0}`}
@@ -572,161 +600,10 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Monthly Deduction (₦)</Text>
+                <Text style={styles.label}>Loan Balance (₦)</Text>
                 <TextInput
                   style={[styles.input, styles.disabledInput]}
-                  value={`₦${savingsBalance?.monthlyDeduction || 0}`}
-                  editable={false}
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Bank Name *</Text>
-                <TextInput
-                  style={[styles.input, styles.disabledInput]}
-                  value={member?.user?.bank[0]?.bank_name || ""}
-                  editable={false}
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Account Number *</Text>
-                <TextInput
-                  style={[styles.input, styles.disabledInput]}
-                  value={member?.user?.bank?.[0]?.account_number || ""}
-                  editable={false}
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Account Name *</Text>
-                <TextInput
-                  style={[styles.input, styles.disabledInput]}
-                  value={member?.user?.bank?.[0]?.account_name || ""}
-                  editable={false}
-                />
-              </View>
-
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={handleProceed}
-              >
-                <Text style={styles.primaryButtonText}>Proceed</Text>
-              </TouchableOpacity>
-            </ScrollView>
-          )}
-
-          {/* Step 2: Document Upload - Page 1 */}
-          {step === 2 && (
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-              <Text style={styles.sectionTitle}>Upload Documents (1/3)</Text>
-              <Text style={styles.subTitle}>
-                Upload clear photos or PDFs of the required documents
-              </Text>
-
-              <View style={styles.uploadSection}>
-                {renderFileUploadBox(
-                  "nonIndebtedness",
-                  "Letter of Non-Indebtedness"
-                )}
-                {renderFileUploadBox("application", "Self Written Application")}
-                {renderFileUploadBox("validId", "Valid ID Card")}
-              </View>
-
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={handleProceed}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.primaryButtonText}>Continue</Text>
-                )}
-              </TouchableOpacity>
-            </ScrollView>
-          )}
-
-          {/* Step 3: Document Upload - Page 2 */}
-          {step === 3 && (
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-              <Text style={styles.sectionTitle}>Upload Documents (2/3)</Text>
-              <Text style={styles.subTitle}>
-                Upload clear photos or PDFs of the required documents
-              </Text>
-
-              <View style={styles.uploadSection}>
-                {renderFileUploadBox("incomeProof", "Proof of Income")}
-                {renderFileUploadBox("accountStatement", "Account Statement")}
-                {renderFileUploadBox("utilityBill", "Utility Bill")}
-              </View>
-
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={handleProceed}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.primaryButtonText}>Continue</Text>
-                )}
-              </TouchableOpacity>
-            </ScrollView>
-          )}
-
-          {/* Step 4: Document Upload - Page 3 */}
-          {step === 4 && (
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-              <Text style={styles.sectionTitle}>Upload Documents (3/3)</Text>
-              <Text style={styles.subTitle}>
-                Upload clear photos or PDFs of the required documents
-              </Text>
-
-              <View style={styles.uploadSection}>
-                {renderFileUploadBox("guarantorLetter", "Guarantor's Letter")}
-                {renderFileUploadBox(
-                  "guarantorPassport",
-                  "Guarantor's Passport"
-                )}
-                {renderFileUploadBox("personalPassport", "Personal Passport")}
-              </View>
-
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={handleProceed}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.primaryButtonText}>Continue</Text>
-                )}
-              </TouchableOpacity>
-            </ScrollView>
-          )}
-
-          {/* Step 5: Loan Details */}
-          {step === 5 && (
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-              <Text style={styles.sectionTitle}>Loan Details</Text>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Loan Amount (₦)</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  placeholder="Enter amount"
-                  value={amount}
-                  onChangeText={setAmount}
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Interest Rate</Text>
-                <TextInput
-                  style={[styles.input, styles.disabledInput]}
-                  value={`${interestRate}%`}
+                  value={`₦${balance?.savings_balance || 0}`}
                   editable={false}
                 />
               </View>
@@ -763,14 +640,28 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Monthly Repayment (₦)</Text>
+                <Text style={styles.label}>Bank Name *</Text>
                 <TextInput
                   style={[styles.input, styles.disabledInput]}
-                  value={
-                    isNaN(monthlyPayment)
-                      ? "0"
-                      : monthlyPayment.toLocaleString()
-                  }
+                  value={member?.bank[0]?.bank_name || ""}
+                  editable={false}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Account Number *</Text>
+                <TextInput
+                  style={[styles.input, styles.disabledInput]}
+                  value={member?.bank?.[0]?.account_number || ""}
+                  editable={false}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Account Name *</Text>
+                <TextInput
+                  style={[styles.input, styles.disabledInput]}
+                  value={member?.bank?.[0]?.account_name || ""}
                   editable={false}
                 />
               </View>
@@ -784,6 +675,144 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
             </ScrollView>
           )}
 
+          {step === 2 && (
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+              <Text style={styles.sectionTitle}>Personal Information</Text>
+              <Text style={styles.subTitle}>
+                Review your personal details before proceeding
+              </Text>
+
+              <View style={styles.previewBox}>
+                <View style={styles.previewRow}>
+                  <Text style={styles.previewLabel}>Full Name:</Text>
+                  <Text style={styles.previewValue}>
+                    {member?.full_name || "N/A"}
+                  </Text>
+                </View>
+                <View style={styles.previewRow}>
+                  <Text style={styles.previewLabel}>Email:</Text>
+                  <Text style={styles.previewValue}>
+                    {member?.email || "N/A"}
+                  </Text>
+                </View>
+                 <View style={styles.previewRow}>
+                  <Text style={styles.previewLabel}>Phone:</Text>
+                  <Text style={styles.previewValue}>
+                    {member?.address || "N/A"}
+                  </Text>
+                </View>
+                <View style={styles.previewRow}>
+                  <Text style={styles.previewLabel}>Address:</Text>
+                  <Text style={styles.previewValue}>
+                    {member?.address || "N/A"}
+                  </Text>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                style={styles.primaryButton}
+                onPress={handleProceed}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.primaryButtonText}>Continue</Text>
+                )}
+              </TouchableOpacity>
+            </ScrollView>
+          )}
+
+          {/* Step 3: Document Upload - Page 1 */}
+          {step === 3 && (
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+              <Text style={styles.sectionTitle}>Upload Documents (1/3)</Text>
+              <Text style={styles.subTitle}>
+                Upload clear photos or PDFs of the required documents
+              </Text>
+
+              <View style={styles.uploadSection}>
+                {renderFileUploadBox(
+                  "nonIndebtedness",
+                  "Letter of Non-Indebtedness"
+                )}
+                {renderFileUploadBox("application", "Self Written Application")}
+                {renderFileUploadBox("validId", "Valid ID Card")}
+              </View>
+
+              <TouchableOpacity
+                style={styles.primaryButton}
+                onPress={handleProceed}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.primaryButtonText}>Continue</Text>
+                )}
+              </TouchableOpacity>
+            </ScrollView>
+          )}
+
+          {/* Step 4: Document Upload - Page 2 */}
+          {step === 4 && (
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+              <Text style={styles.sectionTitle}>Upload Documents (2/3)</Text>
+              <Text style={styles.subTitle}>
+                Upload clear photos or PDFs of the required documents
+              </Text>
+
+              <View style={styles.uploadSection}>
+                {renderFileUploadBox("incomeProof", "Proof of Income")}
+                {renderFileUploadBox("accountStatement", "Account Statement")}
+                {renderFileUploadBox("utilityBill", "Utility Bill")}
+              </View>
+
+              <TouchableOpacity
+                style={styles.primaryButton}
+                onPress={handleProceed}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.primaryButtonText}>Continue</Text>
+                )}
+              </TouchableOpacity>
+            </ScrollView>
+          )}
+
+          {/* Step 5: Document Upload - Page 3 */}
+          {step === 5 && (
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+              <Text style={styles.sectionTitle}>Upload Documents (3/3)</Text>
+              <Text style={styles.subTitle}>
+                Upload clear photos or PDFs of the required documents
+              </Text>
+
+              <View style={styles.uploadSection}>
+                {renderFileUploadBox("guarantorLetter", "Guarantor's Letter")}
+                {renderFileUploadBox(
+                  "guarantorPassport",
+                  "Guarantor's Passport"
+                )}
+                {renderFileUploadBox("personalPassport", "Personal Passport")}
+              </View>
+
+              <TouchableOpacity
+                style={styles.primaryButton}
+                onPress={handleProceed}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.primaryButtonText}>Continue</Text>
+                )}
+              </TouchableOpacity>
+            </ScrollView>
+          )}
+
           {/* Step 6: Loan Summary */}
           {step === 6 && (
             <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -793,7 +822,7 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
                 <View style={styles.previewRow}>
                   <Text style={styles.previewLabel}>Applicant:</Text>
                   <Text style={styles.previewValue}>
-                    {member?.user.full_name}
+                    {member?.full_name}
                   </Text>
                 </View>
                 <View style={styles.previewRow}>
@@ -831,8 +860,8 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
                 <View style={styles.previewRow}>
                   <Text style={styles.previewLabel}>Bank Details:</Text>
                   <Text style={styles.previewValue}>
-                    {member?.user.bank[0].bank_name} -{" "}
-                    {member?.user.bank[0].account_number}
+                    {member?.bank[0].bank_name} -{" "}
+                    {member?.bank[0].account_number}
                   </Text>
                 </View>
               </View>
@@ -854,7 +883,6 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
             </ScrollView>
           )}
 
-          {/* Step 7: OTP Verification */}
           {step === 7 && (
             <ScrollView contentContainerStyle={styles.scrollContent}>
               <Text style={styles.sectionTitle}>OTP Verification</Text>
@@ -888,7 +916,6 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
             </ScrollView>
           )}
 
-          {/* Step 8: Success */}
           {step === 8 && (
             <ScrollView contentContainerStyle={styles.scrollContent}>
               <SuccessScreen
@@ -903,6 +930,8 @@ const LoanEnrollmentFlow: React.FC<LoanEnrollmentFlowProps> = ({
     </Modal>
   );
 };
+
+// ... styles remain the same ...
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
