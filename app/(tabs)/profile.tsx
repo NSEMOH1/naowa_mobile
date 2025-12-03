@@ -17,7 +17,7 @@ import { useMemberStore } from "@/store/user";
 export default function Profile() {
   const router = useRouter();
   const [hideBalance, setHideBalance] = useState(false);
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { member } = useMemberStore();
 
   const links = [
@@ -35,6 +35,7 @@ export default function Profile() {
   };
 
   const handleLogout = () => {
+    logout();
     router.replace("/auth/login");
   };
 

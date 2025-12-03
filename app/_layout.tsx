@@ -4,7 +4,7 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -16,7 +16,9 @@ import {
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
 import React from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
+export const REGISTRATION_KEY = "user_registered";
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
@@ -28,6 +30,24 @@ export default function RootLayout() {
   useEffect(() => {
     setupInterceptors({ getAccessToken, setAccessToken });
   }, [getAccessToken, setAccessToken]);
+
+  useEffect(() => {
+  const checkRegistrationStatus = async () => {
+    try {
+      const isRegistered = await AsyncStorage.getItem(REGISTRATION_KEY);
+      if (isRegistered === "true") {
+        console.log("User is registered, redirecting to login...");
+        router.replace("/auth/login");
+      } else {
+        console.log("User is not registered, staying on current screen");
+      }
+    } catch (error) {
+      console.error("Error checking registration status:", error);
+    }
+  };
+
+  checkRegistrationStatus();
+}, []); 
 
   if (!loaded) {
     // Async font loading only occurs in development.

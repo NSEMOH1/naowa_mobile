@@ -19,6 +19,8 @@ import Stage4NextOfKin from "@/features/signup-stages/stage4";
 import Stage5Documents from "@/features/signup-stages/stage5";
 import Stage6Security from "@/features/signup-stages/stage6";
 import { ArrowRight } from "lucide-react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { REGISTRATION_KEY } from "../_layout";
 
 interface Document {
   uri: string;
@@ -312,7 +314,6 @@ const RegistrationForm = () => {
       }
 
       const formData = createFormData();
-      console.log("Submitting formData:", formData);
       const response = await api.post("/api/auth/member/register", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -321,6 +322,7 @@ const RegistrationForm = () => {
       });
 
       if (response.status === 200 || response.status === 201) {
+        await AsyncStorage.setItem(REGISTRATION_KEY, "true");
         dispatch({ type: "SHOW_SUCCESS" });
       } else {
         throw new Error(response.data?.message || "Registration failed");

@@ -18,6 +18,7 @@ import {
   ForgotPasswordFormErrors,
 } from "@/types";
 import { SafeAreaView } from "react-native-safe-area-context";
+import api from "@/constants/api";
 
 const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
   navigation,
@@ -26,15 +27,11 @@ const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
   const [formData, setFormData] = useState<ForgotPasswordFormData>({
     email: "",
     otp: "",
-    securityAnswer: "",
-    transactionPin: "",
     newPassword: "",
     confirmPassword: "",
   });
   const [errors, setErrors] = useState<ForgotPasswordFormErrors>({});
   const [loading, setLoading] = useState<boolean>(false);
-
-  const securityQuestion: string = "What is your mother's maiden name?";
 
   const updateFormData = (
     field: keyof ForgotPasswordFormData,
@@ -67,20 +64,6 @@ const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
         break;
 
       case 3:
-        if (!formData.securityAnswer.trim()) {
-          newErrors.securityAnswer = "Security answer is required";
-        }
-        break;
-
-      case 4:
-        if (!formData.transactionPin.trim()) {
-          newErrors.transactionPin = "Transaction PIN is required";
-        } else if (formData.transactionPin.length !== 4) {
-          newErrors.transactionPin = "PIN must be 4 digits";
-        }
-        break;
-
-      case 5:
         if (!formData.newPassword.trim()) {
           newErrors.newPassword = "New password is required";
         } else if (formData.newPassword.length < 6) {
@@ -103,45 +86,70 @@ const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
     if (!validateStep(currentStep)) return;
 
     setLoading(true);
+    setErrors({}); 
 
     try {
-      // Simulate API calls
       switch (currentStep) {
         case 1:
-          // Send OTP to email
-          console.log("Sending OTP to:", formData.email);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          try {
+            const response = await api.post("/api/auth/verify-email", {
+              email: formData.email,
+            });
+
+            if (response.data.success) {
+              setCurrentStep(2);
+            } else {
+              setErrors({ email: "Failed to send OTP. Please try again." });
+            }
+          } catch (error: any) {
+            console.error("Error sending OTP:", error);
+            setErrors({
+              email: error.response?.data?.error || "An error occurred. Please try again.",
+            });
+          }
           break;
 
         case 2:
-          // Verify OTP
-          console.log("Verifying OTP:", formData.otp);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          try {
+            const response = await api.post("/api/auth/verify-otp", {
+              email: formData.email,
+              otp: formData.otp,
+            });
+
+            if (response.data.success) {
+              setCurrentStep(3);
+            } else {
+              setErrors({ otp: "Invalid OTP. Please try again." });
+            }
+          } catch (error: any) {
+            console.error("Error verifying OTP:", error);
+            setErrors({
+              otp: error.response?.data?.error || "Failed to verify OTP. Please try again.",
+            });
+          }
           break;
 
         case 3:
-          // Verify security answer
-          console.log("Verifying security answer:", formData.securityAnswer);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          break;
+          try {
+            const response = await api.post("/api/auth/reset-password", {
+              email: formData.email,
+              newPassword: formData.newPassword,
+            });
 
-        case 4:
-          // Verify transaction PIN
-          console.log("Verifying transaction PIN:", formData.transactionPin);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          break;
-
-        case 5:
-          // Reset password
-          console.log("Resetting password");
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+            if (response.data.success) {
+              setCurrentStep(4);
+            } else {
+              setErrors({ newPassword: "Failed to reset password. Please try again." });
+            }
+          } catch (error: any) {
+            console.error("Error resetting password:", error);
+            setErrors({
+              newPassword: error.response?.data?.error || "An error occurred. Please try again.",
+            });
+          }
           break;
       }
-
-      if (currentStep < 6) {
-        setCurrentStep(currentStep + 1);
-      }
-    } catch (error) {
+    } catch (error: any) {
       Alert.alert("Error", "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -151,17 +159,31 @@ const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
   const handleBack = (): void => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+    } else {
+      router.back();
     }
   };
 
   const handleResendOTP = async (): Promise<void> => {
     setLoading(true);
+    setErrors({});
+    
     try {
-      console.log("Resending OTP to:", formData.email);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      Alert.alert("Success", "OTP has been resent to your email");
-    } catch (error) {
-      Alert.alert("Error", "Failed to resend OTP");
+      const response = await api.post("/api/auth/verify-email", {
+        email: formData.email,
+      });
+
+      if (response.data.success) {
+        Alert.alert("Success", "OTP has been resent to your email");
+      } else {
+        Alert.alert("Error", "Failed to resend OTP. Please try again.");
+      }
+    } catch (error: any) {
+      console.error("Error resending OTP:", error);
+      Alert.alert(
+        "Error", 
+        error.response?.data?.error || "Failed to resend OTP. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -195,6 +217,7 @@ const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
+              editable={!loading}
             />
             {errors.email && (
               <Text style={styles.errorText}>{errors.email}</Text>
@@ -225,10 +248,15 @@ const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
               keyboardType="numeric"
               maxLength={6}
               textAlign="center"
+              editable={!loading}
             />
             {errors.otp && <Text style={styles.errorText}>{errors.otp}</Text>}
 
-            <TouchableOpacity onPress={handleResendOTP} disabled={loading}>
+            <TouchableOpacity 
+              onPress={handleResendOTP} 
+              disabled={loading}
+              style={loading && styles.disabledLink}
+            >
               <Text style={styles.linkText}>Didn't receive OTP? Resend</Text>
             </TouchableOpacity>
           </View>
@@ -238,75 +266,19 @@ const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
         return (
           <View style={styles.stepContainer}>
             {renderLogo()}
-            <Text style={styles.title}>Security Question</Text>
-            <Text style={styles.subtitle}>
-              Please answer your security question
-            </Text>
-
-            <Text style={styles.questionText}>{securityQuestion}</Text>
-
-            <TextInput
-              style={[styles.input, errors.securityAnswer && styles.inputError]}
-              placeholder="Enter your answer"
-              value={formData.securityAnswer}
-              onChangeText={(text: string) =>
-                updateFormData("securityAnswer", text)
-              }
-              autoCapitalize="words"
-            />
-            {errors.securityAnswer && (
-              <Text style={styles.errorText}>{errors.securityAnswer}</Text>
-            )}
-          </View>
-        );
-
-      case 4:
-        return (
-          <View style={styles.stepContainer}>
-            {renderLogo()}
-            <Text style={styles.title}>Transaction PIN</Text>
-            <Text style={styles.subtitle}>
-              Enter your 4-digit transaction PIN
-            </Text>
-
-            <TextInput
-              style={[
-                styles.input,
-                styles.pinInput,
-                errors.transactionPin && styles.inputError,
-              ]}
-              placeholder="0000"
-              value={formData.transactionPin}
-              onChangeText={(text: string) =>
-                updateFormData("transactionPin", text.replace(/\D/g, ""))
-              }
-              keyboardType="numeric"
-              maxLength={4}
-              secureTextEntry
-              textAlign="center"
-            />
-            {errors.transactionPin && (
-              <Text style={styles.errorText}>{errors.transactionPin}</Text>
-            )}
-          </View>
-        );
-
-      case 5:
-        return (
-          <View style={styles.stepContainer}>
-            {renderLogo()}
             <Text style={styles.title}>Create New Password</Text>
             <Text style={styles.subtitle}>Enter your new password</Text>
 
             <TextInput
               style={[styles.input, errors.newPassword && styles.inputError]}
-              placeholder="New password"
+              placeholder="New password (min. 6 characters)"
               value={formData.newPassword}
               onChangeText={(text: string) =>
                 updateFormData("newPassword", text)
               }
               secureTextEntry
               autoCapitalize="none"
+              editable={!loading}
             />
             {errors.newPassword && (
               <Text style={styles.errorText}>{errors.newPassword}</Text>
@@ -324,6 +296,7 @@ const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
               }
               secureTextEntry
               autoCapitalize="none"
+              editable={!loading}
             />
             {errors.confirmPassword && (
               <Text style={styles.errorText}>{errors.confirmPassword}</Text>
@@ -331,7 +304,7 @@ const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
           </View>
         );
 
-      case 6:
+      case 4:
         return (
           <View style={styles.stepContainer}>
             {renderLogo()}
@@ -347,7 +320,7 @@ const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
               style={styles.successButton}
               onPress={() => router.push("/auth/login")}
             >
-              <Text style={styles.successButtonText}>Login </Text>
+              <Text style={styles.successButtonText}>Login</Text>
             </TouchableOpacity>
           </View>
         );
@@ -363,10 +336,23 @@ const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoid}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          {currentStep < 4 && (
+            <TouchableOpacity 
+              style={styles.backButton}
+              onPress={handleBack}
+              disabled={loading}
+            >
+              <Text style={styles.backButtonText}>← Back</Text>
+            </TouchableOpacity>
+          )}
+
           {renderStepContent()}
 
-          {currentStep < 6 && (
+          {currentStep < 4 && currentStep !== 4 && (
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[styles.nextButton, loading && styles.buttonDisabled]}
@@ -375,8 +361,12 @@ const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
               >
                 <Text style={styles.nextButtonText}>
                   {loading
-                    ? "Please wait..."
-                    : currentStep === 5
+                    ? currentStep === 1
+                      ? "Sending OTP..."
+                      : currentStep === 2
+                      ? "Verifying..."
+                      : "Resetting..."
+                    : currentStep === 3
                     ? "Reset Password"
                     : "Continue"}
                 </Text>
@@ -401,13 +391,25 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
   },
+  backButton: {
+    alignSelf: 'flex-start',
+    marginBottom: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: "#007AFF",
+    fontFamily: "Poppins_400Regular",
+  },
   logoContainer: {
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 30,
+    marginTop: 20,
   },
   logo: {
-    width: 60,
-    height: 80,
+    width: 80,
+    height: 100,
     resizeMode: "contain",
   },
   stepContainer: {
@@ -451,31 +453,12 @@ const styles = StyleSheet.create({
     letterSpacing: 8,
     fontFamily: "Poppins_400Regular",
   },
-  pinInput: {
-    fontSize: 24,
-    fontWeight: "bold",
-    letterSpacing: 4,
-    fontFamily: "Poppins_400Regular",
-  },
-  questionText: {
-    fontSize: 18,
-    fontWeight: "600",
-    textAlign: "center",
-    marginBottom: 20,
-    color: "#333",
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#E5E5EA",
-    fontFamily: "Poppins_400Regular",
-  },
   errorText: {
     color: "#FF3B30",
     fontSize: 14,
-    marginTop: -10,
+    marginTop: -5,
     marginBottom: 10,
-    textAlign: "center",
+    textAlign: "left",
     fontFamily: "Poppins_400Regular",
   },
   linkText: {
@@ -486,13 +469,17 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
     fontFamily: "Poppins_400Regular",
   },
+  disabledLink: {
+    opacity: 0.5,
+  },
   buttonContainer: {
     marginTop: 30,
+    marginBottom: 20,
   },
   nextButton: {
-    backgroundColor: "#2F4F2F",
+    backgroundColor: "#982323",
     borderRadius: 12,
-    padding: 16,
+    padding: 18,
     alignItems: "center",
   },
   nextButtonText: {
@@ -503,21 +490,22 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     backgroundColor: "#B0B0B0",
+    opacity: 0.7,
   },
   successTitle: {
-    fontSize: 15,
+    fontSize: 26,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 15,
+    marginBottom: 20,
     color: "#34C759",
     fontFamily: "Poppins_400Regular",
   },
   successSubtitle: {
-    fontSize: 15,
+    fontSize: 16,
     textAlign: "center",
     marginBottom: 40,
     color: "#666",
-    lineHeight: 26,
+    lineHeight: 24,
     fontFamily: "Poppins_400Regular",
   },
   successButton: {

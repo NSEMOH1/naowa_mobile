@@ -13,7 +13,7 @@ useEffect(() => {
 
     return () => clearTimeout(timer);
   }
-}, [autoFetch, loading, fetchSavingsBalance]);
+}, [autoFetch, fetchSavingsBalance]);
 
   return {
     balance,

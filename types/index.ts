@@ -173,8 +173,6 @@ export interface WithdrawalFormData {
 export interface ForgotPasswordFormData {
   email: string;
   otp: string;
-  securityAnswer: string;
-  transactionPin: string;
   newPassword: string;
   confirmPassword: string;
 }
