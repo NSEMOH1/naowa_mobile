@@ -64,7 +64,6 @@ const PaymentFlow = () => {
       return;
     }
     setIsLoading(true);
-    console.log("email", user?.email)
 
     popup.newTransaction({
       email: user?.email || "mail@naowa.com",
@@ -92,12 +91,10 @@ const PaymentFlow = () => {
         }
       },
       onCancel: async () => {
-        console.log("Payment Cancelled");
         setIsLoading(false);
         Alert.alert("Payment Cancelled", "Your payment was cancelled.");
       },
       onError: (err: any) => {
-        console.log("Payment Error:", err);
         setIsLoading(false);
         Alert.alert(
           "Payment Error",

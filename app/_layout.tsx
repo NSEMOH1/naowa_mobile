@@ -36,7 +36,6 @@ export default function RootLayout() {
     try {
       const isRegistered = await AsyncStorage.getItem(REGISTRATION_KEY);
       if (isRegistered === "true") {
-        console.log("User is registered, redirecting to login...");
         router.replace("/auth/login");
       } else {
         console.log("User is not registered, staying on current screen");

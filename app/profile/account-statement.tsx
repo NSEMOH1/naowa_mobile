@@ -26,17 +26,10 @@ const AccountStatement = () => {
       Alert.alert("Error", "Please select both from and to dates");
       return;
     }
-
-    console.log("Account Statement Request:", {
-      fromDate,
-      toDate,
-      selectedType,
-    });
     Alert.alert(
       "Success",
       "Account statement will be generated and sent to your email"
     );
-    // API call here
   };
 
   return (

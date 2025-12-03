@@ -105,21 +105,17 @@ const Stage3BankInfoSimple: React.FC<Stage3Props> = ({
     banks,
     error: bankError,
     isLoading: banksLoading,
-    loadAllBanks,
     hasMore,
   } = useBanks(apiKey);
   const [showBankModal, setShowBankModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Load all banks when modal opens
   useEffect(() => {
     if (showBankModal && hasMore && !banksLoading) {
       console.log("Search modal opened, fetching all banks...");
-      loadAllBanks();
     }
-  }, [showBankModal, hasMore, banksLoading, loadAllBanks]);
+  }, [showBankModal, hasMore, banksLoading]);
 
-  // Debounced search handler
   const handleSearch = useMemo(
     () =>
       debounce((text: string) => {

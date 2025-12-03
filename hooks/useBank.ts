@@ -57,9 +57,6 @@ const useBanks = (apiKey: string) => {
 
       const newBanks: Bank[] = response.data.data.map((bank, index) => {
         const id = bank.id || `${bank.code || `unknown-${index}`}-${uuidv4()}`;
-        console.log(
-          `Bank: ${bank.name}, ID: ${id}, Code: ${bank.code || "missing"}`
-        );
         return {
           name: bank.name,
           code: bank.code || `unknown-${uuidv4()}`,
@@ -69,12 +66,12 @@ const useBanks = (apiKey: string) => {
 
       const meta = response.data.meta;
 
-      console.log(
-        `Fetched ${newBanks.length} banks, cursor: ${
-          cursor || "initial"
-        }, meta:`,
-        meta
-      );
+      // console.log(
+      //   `Fetched ${newBanks.length} banks, cursor: ${
+      //     cursor || "initial"
+      //   }, meta:`,
+      //   meta
+      // );
 
       setBanks((prevBanks: Bank[]) => {
         const newBankIds = new Set(newBanks.map((bank) => bank.id));
@@ -99,9 +96,6 @@ const useBanks = (apiKey: string) => {
       const maxRetries = 3;
       if (retryCount < maxRetries) {
         const delay = 1000 * Math.pow(2, retryCount);
-        console.log(
-          `Retrying fetch for cursor ${cursor || "initial"} after ${delay}ms...`
-        );
         await new Promise((resolve) => setTimeout(resolve, delay));
         return fetchBanks(cursor, retryCount + 1);
       }
@@ -120,13 +114,11 @@ const useBanks = (apiKey: string) => {
 
   const loadMoreBanks = async (): Promise<void> => {
     if (hasMore && !isLoading && nextCursor) {
-      console.log(`Loading more banks, nextCursor: ${nextCursor}`);
       await fetchBanks(nextCursor);
     }
   };
 
   useEffect(() => {
-    console.log("Initiating initial bank fetch");
     fetchBanks();
   }, []);
 
