@@ -218,7 +218,7 @@ export default function Loan() {
 
         <View style={styles.balanceCard}>
           <Text style={styles.balanceLabel}>Loan Balance</Text>
-          <Text style={styles.balanceAmount}>₦{balance?.loan_balance}</Text>
+          <Text style={styles.balanceAmount}>₦{balance?.loan_balance || 0}</Text>
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
               <Ionicons name="card" size={16} color="#fff" />
